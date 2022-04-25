@@ -2,6 +2,7 @@ package pgconn
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"net"
@@ -58,9 +59,10 @@ func (pe *PgError) SQLState() string {
 }
 
 type connectError struct {
-	config *Config
-	msg    string
-	err    error
+	config       *Config
+	msg          string
+	err          error
+	isErrBadConn bool
 }
 
 func (e *connectError) Error() string {
@@ -74,6 +76,15 @@ func (e *connectError) Error() string {
 
 func (e *connectError) Unwrap() error {
 	return e.err
+}
+
+func (e *connectError) Is(target error) bool {
+	if target == driver.ErrBadConn && e.isErrBadConn {
+		return true
+	}
+
+	_, ok := target.(*connectError)
+	return ok
 }
 
 type connLockError struct {

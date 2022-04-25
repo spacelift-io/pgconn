@@ -241,7 +241,7 @@ func connect(ctx context.Context, config *Config, fallbackConfig *FallbackConfig
 		if errors.As(err, &netErr) && netErr.Timeout() {
 			err = &errTimeout{err: err}
 		}
-		return nil, &connectError{config: config, msg: "dial error", err: err}
+		return nil, &connectError{config: config, msg: "dial error", err: err, isErrBadConn: true}
 	}
 
 	pgConn.conn = netConn
